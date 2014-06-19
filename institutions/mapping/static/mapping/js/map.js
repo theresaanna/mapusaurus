@@ -4,7 +4,10 @@ var Mapusaurus = {
     //  Leaflet map
     map: null,
     //  Leaflet layers
-    layers: {tract: {minority: null}},
+    layers: {
+        tract: {minority: null},
+        base: {water: null}
+    },
     //  Stores geo data, along with fields for layers
     dataStore: {tract: {}},
     //  Stores stat data when the associated geos aren't loaded
@@ -24,6 +27,16 @@ var Mapusaurus = {
             {onEachFeature: Mapusaurus.eachMinority,
              style: Mapusaurus.minorityContinuousStyle}
         );
+
+        Mapusaurus.layers.base.water = new L.TileLayer.GeoJSON('http://tile.openstreetmap.us/vectiles-water-areas/{z}/{x}/{y}.json', {clipTiles: false}, {
+            style: {
+                "fillColor": "#cce3f5",
+                "stroke": false,
+                "fillOpacity": 1
+            }}
+        );
+        map.addLayer(Mapusaurus.layers.base.water);
+
         Mapusaurus.layers.tract.minority.addTo(map);
         if (Mapusaurus.urlParam('lender')) {
             Mapusaurus.layers.tract.loanVolume = L.layerGroup([]);

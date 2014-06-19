@@ -90,7 +90,13 @@ STATIC_URL = '/static/'
 
 LEAFLET_CONFIG = {
     'RESET_VIEW': False,
-    'TILES': 'http://tile.stamen.com/toner-lite/{z}/{x}/{y}.jpg',
+    'TILES': '',
+    'PLUGINS': {
+        'basics': {
+            'js': ['http://rawgithub.com/glenrobertson/leaflet-tilelayer-geojson/master/TileLayer.GeoJSON.js'],
+            'auto-include': True
+        }
+    }
 }
 
 from institutions.settings.local_settings import *
