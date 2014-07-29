@@ -56,6 +56,8 @@ class InstitutionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Institution
+        fields = ('formatted_name', 'id', 'year', 'ffiec_id')
+
 
 class PaginatedResultsSerializer(PaginationSerializer):
     class Meta:
@@ -103,6 +105,7 @@ def search(request):
     for result in query:
         result.object.num_loans = result.num_loans
         results.append(result.object)
+
     if request.accepted_renderer.format != 'html':
         serializer = InstitutionSerializer(results, many=True)
     else: 
