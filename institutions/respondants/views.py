@@ -120,7 +120,7 @@ def search(request):
         serializer_context = {'request': request}
         serializer = PaginatedResultsSerializer(resultset,
                                          context=serializer_context)
-        results = serializer.data 
+    results = serializer.data 
 
     return Response(
         {'institutions': results, 'query_str': query_str,
