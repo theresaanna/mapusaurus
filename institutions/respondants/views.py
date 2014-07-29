@@ -1,5 +1,6 @@
 import re
 
+from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from django.template import defaultfilters
 from haystack.inputs import AutoQuery, Exact
@@ -7,6 +8,7 @@ from haystack.query import SearchQuerySet
 from rest_framework import serializers
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.pagination import PaginationSerializer
 
 from respondants.models import Institution
 
@@ -55,6 +57,10 @@ class InstitutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Institution
 
+class PaginatedResultsSerializer(PaginationSerializer):
+    class Meta:
+        object_serializer_class = InstitutionSerializer
+
 
 # 90123456789
 SMASH_RE = re.compile(r"^(?P<agency>[0-9])(?P<respondent>[0-9-]{10})$")
@@ -92,14 +98,26 @@ def search(request):
         query = query.filter(content=AutoQuery(query_str))
     else:
         query = []
-    query = query[:25]
 
     results = []
     for result in query:
         result.object.num_loans = result.num_loans
         results.append(result.object)
     if request.accepted_renderer.format != 'html':
-        results = InstitutionSerializer(results, many=True).data
+        serializer = InstitutionSerializer(results, many=True)
+    else: 
+        paginator = Paginator(query, 25)
+        page = request.GET.get('page')
+
+        if not isinstance(page, int):
+            page = 1
+
+        resultset = paginator.page(page)
+
+        serializer_context = {'request': request}
+        serializer = PaginatedResultsSerializer(resultset,
+                                         context=serializer_context)
+        results = serializer.data 
 
     return Response(
         {'institutions': results, 'query_str': query_str,
